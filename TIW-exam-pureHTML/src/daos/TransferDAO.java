@@ -42,14 +42,14 @@ public class TransferDAO {
 		}
 	}
 	
-	public boolean newTransfer(int amount, String reason, int CApayer, int CApayee) {
+	public boolean newTransfer(int amount, String reason, String CApayer, String CApayee) throws SQLException{
 		String query = "INSERT INTO transfer (amount, reason, CApayer, CApayee) VALUES (?, ?, ?, ?)";
 		try {
 			PreparedStatement pstatement = con.prepareStatement(query);
 			pstatement.setInt(1, amount);
 			pstatement.setString(2,  reason);
-			pstatement.setInt(3,  CApayer);
-			pstatement.setInt(4,  CApayee);
+			pstatement.setString(3,  CApayer);
+			pstatement.setString(4,  CApayee);
 			int flag = pstatement.executeUpdate();
 			if(flag == 0) {
 				return false;
@@ -58,7 +58,7 @@ public class TransferDAO {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return false;
+			throw new SQLException();
 		}
 		
 	}

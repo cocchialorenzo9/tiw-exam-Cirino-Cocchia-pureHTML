@@ -1,0 +1,36 @@
+body{
+  background: #0D4A6F;
+}
+
+header, main, footer {
+  min-width: 810px; /* 810/3 = 270 */
+}
+
+*.container {
+  max-width: 810px;
+  margin: auto;
+}
+
+*.error {
+  color: red;
+}
+
+*.container {
+  max-width: 810px;
+  margin: auto;
+}
+
+header, main {
+  background: white;
+  overflow: auto;
+}
+
+header h1{
+  font-family: 'Denk One', sans-serif;
+  float: left;
+  width: 540px;
+}
+
+header nav{
+  float: right;
+}

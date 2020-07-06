@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<link rel="stylesheet" type="text/css" href="Styles/style.css">
+<meta charset="UTF-8">
+<title>Current account state</title>
+</head>
+<body>
+<header>
+	<h3>This is your current account page</h3>
+	<nav>
+		<a href="Logout">Log out</a>
+	</nav>
+</header>
+
+<main>
+	<h4>Account details</h4>
+	<table border="1">
+		<tr>
+			<th>Current Account code</th>
+			<th>Current check</th>
+		</tr>
+		<tr>
+			<td th:text="${thyCA.CAcode}"></td>
+			<td th:text="${thyCA.check}"></td>
+		</tr>
+	</table>
+	<h4>All transfers made by and to this account</h4>
+	<table border="1" th:if="${not #lists.isEmpty(allTransfers)}">
+	<thead>
+		<tr>
+			<th>Date</th>
+			<th>Amount</th>
+			<th>Reason</th>
+			<th>Role</th> <!-- Payer or payee -->
+		</tr>
+	</thead>
+	<tbody th:remove="all-but-first">
+		<tr th:each="transfer : ${allTransfers}">
+			<td th:text="${transfer.date}"></td>
+			<td th:text="${transfer.amount}"></td>
+			<td th:text="${transfer.reason}"></td>
+			<td th:if="${transfer.CApayer} == ${thyCA.CAcode}" th:text="${transfer.CApayer}"></td>
+			<td th:if="${transfer.CApayee} == ${thyCA.CAcode}" th:text="${transfer.CApayee}"></td>
+		</tr>
+		<tr>
+			<td>Mock up date0</td>
+			<td>Mock up amount0</td>
+			<td>Mock up reason0</td>
+			<td>Mock up role0</td>
+		</tr>
+		<tr>
+			<td>Mock up date1</td>
+			<td>Mock up amount1</td>
+			<td>Mock up reason1</td>
+			<td>Mock up role1</td>
+		</tr>
+	</tbody>
+	</table>
+	<h5 th:if="${#lists.isEmpty(allTransfers)}">There is no transfer made by or to this account</h5>
+	<h4>Submit to make a new Transfer</h4>
+	<form th:action="@{/NewTransfer}" method="POST">
+		<fieldset>
+			Amount: <input type="number" name="amount" required><br>
+			Reason: <input type="text" name="reason" required><br>
+			Code payer: <input type="text" name="CApayer" required><br>
+			Code payee: <input type="text" name="CApayee" required><br>
+			<button type="submit">Send request</button>
+		</fieldset>
+	</form>
+</main>
+
+<footer>
+</footer>
+	
+
+</body>
+</html>

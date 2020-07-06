@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.*;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -13,9 +14,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.WebContext;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
+
+import daos.CurrentAccountDAO;
+import daos.TransferDAO;
+import beans.CurrentAccountBean;
+import beans.TransferBean;
+
 
 /**
  * Servlet implementation class GetCurrentAccount
@@ -25,7 +34,7 @@ public class GetCurrentAccount extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private Connection connection = null;
 	private TemplateEngine templateEngine = null;
-	//private ServletContext context = null;
+	private ServletContext context = null;
 	
 
 	public void init() throws ServletException {
@@ -36,7 +45,7 @@ public class GetCurrentAccount extends HttpServlet {
 		this.templateEngine.setTemplateResolver(templateResolver);
 		templateResolver.setSuffix(".html");
 		try {
-			ServletContext context = getServletContext();
+			context = getServletContext();
 			String driver = context.getInitParameter("dbDriver");
 			String url = context.getInitParameter("dbUrl");
 			String user = context.getInitParameter("dbUser");
@@ -51,21 +60,53 @@ public class GetCurrentAccount extends HttpServlet {
 		}
 	}
 	
-
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		response.getWriter().append("Served at: ").append(request.getContextPath());
+		int CAid = -1;
+		try {
+			CAid = Integer.parseInt(StringEscapeUtils.escapeJava(request.getParameter("CAid")));
+		} catch (IllegalArgumentException e) {
+			response.getWriter().println("Wrong CAid number format for the request");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			return;
+		}
+		
+		CurrentAccountDAO caDao = new CurrentAccountDAO(connection);
+		TransferDAO transferDao = new TransferDAO(connection);
+		List<TransferBean> allTransfers = new ArrayList<>();
+		
+		CurrentAccountBean CA = caDao.getCAById(CAid);
+		allTransfers = transferDao.getTransfersByCAId(CAid);
+		
+		if(CA == null) {
+			response.getWriter().println("There was a server error, retry later");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			return;
+		}
+		
+		request.getSession().setAttribute("CA", CA);
+		
+		String path = "/Pages/AccountState.html";
+		
+		final WebContext ctx = new WebContext(request, response, context, request.getLocale());
+		ctx.setVariable("thyCA", CA);
+		ctx.setVariable("allTransfers", allTransfers);
+		templateEngine.process(path, ctx, response.getWriter());
+		
+		
 	}
 
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
 		doGet(request, response);
+	}
+	
+	public void destroy() {
+		try {
+			if (connection != null) {
+				connection.close();
+			}
+		} catch (SQLException sqle) {
+			sqle.printStackTrace();
+		}
 	}
 
 }

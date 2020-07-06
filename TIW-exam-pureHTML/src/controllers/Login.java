@@ -86,14 +86,27 @@ public class Login extends HttpServlet {
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 			response.getWriter().println("Incorrect credentials");
 		} else {
-			request.getSession().setAttribute("user", user);
-			response.setStatus(HttpServletResponse.SC_OK);
-			response.getWriter().println(usercode);
 			
-			String path = getServletContext() + "/Homepage.jsp";
+			System.out.println("Login by " + user.getName());
+						
+			request.getSession().setAttribute("user", user);
+			response.getWriter().println(usercode);
+					
+			String path = getServletContext().getContextPath() + "/GetCurrentAccountsList?iduser=" + user.getIduser();
+			//request.setAttribute("iduser", user.getIduser());
 			response.sendRedirect(path);
 		}
 		
+	}
+	
+	public void destroy() {
+		try {
+			if (connection != null) {
+				connection.close();
+			}
+		} catch (SQLException sqle) {
+			sqle.printStackTrace();
+		}
 	}
 
 }

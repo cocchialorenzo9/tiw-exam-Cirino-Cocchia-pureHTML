@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<link rel="stylesheet" type="text/css" href="Styles/style.css">
+<meta charset="UTF-8">
+<title>Home page</title>
+</head>
+<body>
+<header>
+	<h3>Welcome back <span th:text="${session.user.name}">mockup</span>! </h3>
+	<nav>
+		<a href="Logout">Log out</a>
+	</nav>
+</header>
+
+<main>
+	<h4>Here there are all of your current accounts</h4>
+	<table border="1">
+		<tr>
+			<th>Code</th>
+			<th>Current check</th>
+			<th></th>
+		</tr>
+		<tr th:each="CA : ${allCA}">
+			<td th:text="${CA.CAcode}"></td>
+			<td th:text="${CA.check}"></td>
+			<td><a th:href="@{/GetCurrentAccount(CAid=${CA.idcurrentAccount})}">More info</a></td>
+		</tr>
+	</table>
+</main>
+
+<footer>
+</footer>
+
+</body>
+</html>
