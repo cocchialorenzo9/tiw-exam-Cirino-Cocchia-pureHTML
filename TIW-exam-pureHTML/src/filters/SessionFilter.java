@@ -11,16 +11,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-/**
- * Servlet Filter implementation class SessionFilter
- */
+
 @WebFilter(
-		servletNames = {"/GetCurrentAccount", "/GetCurrentAccountList", "/NewTransfer"}
+		urlPatterns = {"/GetCurrentAccount", "/GetCurrentAccountsList", "/NewTransfer"}
 )
 public class SessionFilter implements Filter {
 
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		
+		System.out.println("Filtering ... ");
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse res = (HttpServletResponse) response;
 		String loginpath = req.getServletContext().getContextPath() + "/index.html";

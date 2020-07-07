@@ -3,7 +3,7 @@ package beans;
 public class CurrentAccountBean {
 	private int idcurrentAccount;
 	private String CAcode;
-	private int check;
+	private float total;
 	public int getIdcurrentAccount() {
 		return idcurrentAccount;
 	}
@@ -17,11 +17,11 @@ public class CurrentAccountBean {
 	public void setCAcode(String cAcode) {
 		CAcode = cAcode;
 	}
-	public int getCheck() {
-		return check;
+	public float getTotal() {
+		return total;
 	}
-	public void setCheck(int check) {
-		this.check = check;
+	public void setTotal(float total) {
+		this.total = total;
 	}
 
 }

@@ -20,4 +20,8 @@
     <param-name>dbDriver</param-name>
     <param-value>com.mysql.cj.jdbc.Driver</param-value>
   </context-param>
+  <error-page>
+    <exception-type>src.exceptions.PaymentRefusedException</exception-type>
+    <location>/ErrorPages/PaymentKO.jsp</location>
+  </error-page>
 </web-app>

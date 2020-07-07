@@ -92,8 +92,7 @@ public class Login extends HttpServlet {
 			request.getSession().setAttribute("user", user);
 			response.getWriter().println(usercode);
 					
-			String path = getServletContext().getContextPath() + "/GetCurrentAccountsList?iduser=" + user.getIduser();
-			//request.setAttribute("iduser", user.getIduser());
+			String path = getServletContext().getContextPath() + "/GetCurrentAccountsList";
 			response.sendRedirect(path);
 		}
 		

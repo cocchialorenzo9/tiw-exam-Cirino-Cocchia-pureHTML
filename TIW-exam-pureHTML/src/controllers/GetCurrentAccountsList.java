@@ -14,13 +14,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.text.StringEscapeUtils;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.WebContext;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
 
 import beans.CurrentAccountBean;
+import beans.UserBean;
 import daos.CurrentAccountDAO;
 
 /**
@@ -62,20 +62,16 @@ public class GetCurrentAccountsList extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		int userId = -1;
 		
-		try {
-			userId = Integer.parseInt(StringEscapeUtils.escapeJava(request.getParameter("iduser")));
-		} catch (IllegalArgumentException e) {
-			response.getWriter().println("Wrong userId number format for the request");
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			return;
-		}
+		int userId = ((UserBean) request.getSession().getAttribute("user")).getIduser();
 		
 		CurrentAccountDAO caDao = new CurrentAccountDAO(connection);
 		List<CurrentAccountBean> allCA = caDao.getCAByUser(userId);
 		
-		
+		for(CurrentAccountBean CA : allCA) {
+			System.out.println("Current check: " + CA.getTotal());
+		}
+			
 		if(allCA == null) {
 			response.getWriter().println("There was a server error, retry later");
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

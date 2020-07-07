@@ -9,8 +9,8 @@
 </head>
 <body>
 	<h3>Your payment has been confirmed!</h3>
-	<c:url value="GetCurrentAccountList?iduser=${user.iduser}" var="homeUrl"/>
-	<c:url value="GetCurrentAccount?CAid=${CA.idcurrentAccount}" var="CAUrl"/>
+	<c:url value="GetCurrentAccountsList" var="homeUrl"/>
+	<c:url value="GetCurrentAccount?CAid=${pageContext.request.cookies[idcurrentAccount]}" var="CAUrl"/>
 	<p><a href="${homeUrl}">Cilck here</a> to go to your homepage
 	<p><a href="${CAUrl}">Click here</a> to go back to the selected account state
 </body>

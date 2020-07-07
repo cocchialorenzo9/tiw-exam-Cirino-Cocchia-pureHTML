@@ -23,7 +23,6 @@ import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
 import beans.CurrentAccountBean;
 import daos.CurrentAccountDAO;
 import daos.TransferDAO;
-
 /**
  * Servlet implementation class NewTransfer
  */
@@ -63,7 +62,10 @@ public class NewTransfer extends HttpServlet {
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		int amount = 0;
+		boolean inputIsOk = false;
+		String errorMessage = "";
+		
+		float amount = 0;
 		String reason = null;
 		String CApayer = null;
 		String CApayee = null;
@@ -75,44 +77,46 @@ public class NewTransfer extends HttpServlet {
 		//input controls section
 		try {
 			
-			amount = Integer.parseInt(StringEscapeUtils.escapeJava(request.getParameter("amount")));
+			amount = Float.parseFloat(StringEscapeUtils.escapeJava(request.getParameter("amount")));
 			reason = StringEscapeUtils.escapeJava(request.getParameter("reason"));
 			CApayer = StringEscapeUtils.escapeJava(request.getParameter("CApayer"));
 			CApayee = StringEscapeUtils.escapeJava(request.getParameter("CApayee"));
 						
 			if(reason == null || CApayer == null || CApayee == null) {
-				response.getWriter().println("You can't pass null strings");
+				errorMessage = "You can't pass null strings";
 				throw new IllegalArgumentException();
 			} else if(amount <= 0) {
-				response.getWriter().println("You can't do a transfer with an amount less than or equals to 0");
+				errorMessage = "You can't do a transfer with an amount less than or equals to 0";
 				throw new IllegalArgumentException();
 			} else if(reason.isEmpty() || CApayer.isEmpty() || CApayee.isEmpty()) {
-				response.getWriter().println("You can't pass empty strings");
+				errorMessage = "You can't pass empty strings";
 				throw new IllegalArgumentException();
 			} else if(CApayer.length() != 4 || CApayee.length() != 4){
-				response.getWriter().println("Current Account length is incorrect");
+				errorMessage = "Current Account length is incorrect";
 				throw new IllegalArgumentException();
 			} else if (CApayer.contentEquals(CApayee)) {
-				response.getWriter().println("Can't transfer an amuont from an account to the same account");
+				errorMessage = "Can't transfer an amuont from an account to the same account";
 				throw new IllegalArgumentException();
 			} else {
 				CurrentAccountDAO caDao = new CurrentAccountDAO(connection);
 				payer = caDao.getCAByCode(CApayer);
 				payee = caDao.getCAByCode(CApayee);
 				if(payer == null || payee == null) {
-					response.getWriter().println("You inserted an invalid code");
+					errorMessage = "You inserted an invalid code";
 					throw new IllegalArgumentException();
-				} else if(payer.getCheck() < amount) {
-					response.getWriter().println("Payer can't afford that amount of money");
+				} else if(payer.getTotal() < amount) {
+					errorMessage = "Payer can't afford that amount of money";
 					throw new IllegalArgumentException();
 				}
+				inputIsOk = true;
 			}
 		} catch (IllegalArgumentException e) {
-			path = "/Pages/PaymentKO.jsp";
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().println("You passed an argument considered illegal");
-			RequestDispatcher dispatcher = request.getRequestDispatcher(path);
-			dispatcher.forward(request, response);
+			//response.getWriter().println("You passed an argument considered illegal");
+			if(errorMessage.contentEquals("")) {
+				errorMessage = "There was an error in the server";
+			}
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, errorMessage);
+
 		}
 		
 		//transaction section
@@ -123,53 +127,49 @@ public class NewTransfer extends HttpServlet {
 		//phantom reads
 		//https://docs.oracle.com/javase/tutorial/jdbc/basics/transactions.html		
 		
-		TransferDAO transferDao = new TransferDAO(connection);
-		CurrentAccountDAO caDao = new CurrentAccountDAO(connection);
-		Savepoint savepoint = null;
-		
-		try {
-			connection.setAutoCommit(false);
-			savepoint = connection.setSavepoint();
+		if(inputIsOk) {
+			TransferDAO transferDao = new TransferDAO(connection);
+			CurrentAccountDAO caDao = new CurrentAccountDAO(connection);
+			Savepoint savepoint = null;
 			
-		} catch (SQLException e) {
-			e.printStackTrace();
-			path = "/Pages/PaymentKO.jsp";
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			response.getWriter().println("There was an error while connecting to the server, retry later");
-			RequestDispatcher dispatcher = request.getRequestDispatcher(path);
-			dispatcher.forward(request, response);
-		}
-		
-		try {
-			int checkPayer = caDao.getCheckByCode(CApayer);
-			int checkPayee = caDao.getCheckByCode(CApayee);
-			boolean transPayer = caDao.updateCheckByAmount(CApayer, checkPayer - amount);
-			boolean transPayee = caDao.updateCheckByAmount(CApayee, checkPayee + amount);
-			boolean transRecord = transferDao.newTransfer(amount, reason, CApayer, CApayee);
-			if(!transPayer || !transPayee || !transRecord) {
-				throw new SQLException();
-			} else {
-				connection.commit();
-				path = "/Pages/PaymentOK.jsp";
-				response.setStatus(HttpServletResponse.SC_ACCEPTED);
-				response.getWriter().println("Transfer has been registered");
-				RequestDispatcher dispatcher = request.getRequestDispatcher(path);
-				dispatcher.forward(request, response);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
 			try {
-				connection.rollback(savepoint);
-			} catch (SQLException e2) {
-				e2.printStackTrace();
+				connection.setAutoCommit(false);
+				savepoint = connection.setSavepoint();
+				
+			} catch (SQLException e) {
+				e.printStackTrace();
+				//response.getWriter().println("There was an error while connecting to the server, retry later");
+				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "There was an error while connecting to the server, retry later");
 			}
-		} finally {
-			path = "/Pages/PaymentKO.jsp";
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			request.setAttribute("error", "There was an error while connecting to the server, retry later");
-			response.getWriter().println("There was an error while connecting to the server, retry later");
-			RequestDispatcher dispatcher = request.getRequestDispatcher(path);
-			dispatcher.forward(request, response);
+			
+			try {
+				float checkPayer = caDao.getTotalByCode(CApayer);
+				float checkPayee = caDao.getTotalByCode(CApayee);
+				boolean transPayer = caDao.updateCheckByAmount(CApayer, checkPayer - amount);
+				boolean transPayee = caDao.updateCheckByAmount(CApayee, checkPayee + amount);
+				boolean transRecord = transferDao.newTransfer(amount, reason, CApayer, CApayee);
+				if(!transPayer || !transPayee || !transRecord) {
+					throw new SQLException();
+				} else {
+					connection.commit();
+					path = "/Pages/PaymentOK.jsp";
+					response.setStatus(HttpServletResponse.SC_OK);
+					response.getWriter().println("Transfer has been registered");
+					RequestDispatcher dispatcher = request.getRequestDispatcher(path);
+					dispatcher.forward(request, response);
+					return;
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+				//throw new PaymentRefusedException("There was an error while connecting to the server, retry later");
+				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "There was an error while connecting to the server, retry later");
+				try {
+					connection.rollback(savepoint);
+				} catch (SQLException e2) {
+					e2.printStackTrace();
+					response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "There was an error while connecting to the server, retry later");
+				}
+			}
 		}
 	}
 	

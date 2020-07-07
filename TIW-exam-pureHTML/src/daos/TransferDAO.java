@@ -17,12 +17,13 @@ public class TransferDAO {
 		this.con = connection;
 	}
 	
-	public List<TransferBean> getTransfersByCAId (int idcurrentAccount) {
-		String query = "SELECT * FROM transfer WHERE CApayer = ? OR CApayee = ?";
+	public List<TransferBean> getTransfersByCAId (String CAcode) throws SQLException {
+		String query = "SELECT * FROM transfer WHERE CApayer = ? OR CApayee = ? ORDER BY date ASC";
 		try {
 			PreparedStatement pstatement = con.prepareStatement(query);
-			pstatement.setInt(1, idcurrentAccount);
-			pstatement.setInt(2, idcurrentAccount);
+			System.out.println("id passed: " + CAcode);
+			pstatement.setString(1, CAcode);
+			pstatement.setString(2, CAcode);
 			ResultSet result = pstatement.executeQuery();
 			List<TransferBean> returningList = new ArrayList<>();
 			while(result.next()) {
@@ -38,15 +39,15 @@ public class TransferDAO {
 			return returningList;
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return null;
+			throw new SQLException();
 		}
 	}
 	
-	public boolean newTransfer(int amount, String reason, String CApayer, String CApayee) throws SQLException{
+	public boolean newTransfer(float amount, String reason, String CApayer, String CApayee) throws SQLException{
 		String query = "INSERT INTO transfer (amount, reason, CApayer, CApayee) VALUES (?, ?, ?, ?)";
 		try {
 			PreparedStatement pstatement = con.prepareStatement(query);
-			pstatement.setInt(1, amount);
+			pstatement.setFloat(1, amount);
 			pstatement.setString(2,  reason);
 			pstatement.setString(3,  CApayer);
 			pstatement.setString(4,  CApayee);

@@ -9,8 +9,8 @@
 </head>
 <body>
 	<h3>Your payment has been refused!</h3>
-	<c:url value="GetCurrentAccountsList?iduser=${user.iduser}" var="homeUrl"/>
-	<c:url value="GetCurrentAccount?CAid=${CA.idcurrentAccount}" var="CAUrl"/>
+	<c:url value="GetCurrentAccountsList" var="homeUrl"/>
+	<c:url value="GetCurrentAccount?CAid=${cookie.idCurrentAccount}" var="CAUrl"/>
 	<p><a href="${homeUrl}">Cilck here</a> to go to your homepage
 	<p><a href="${CAUrl}">Click here</a> to go back to the selected account state
 </body>

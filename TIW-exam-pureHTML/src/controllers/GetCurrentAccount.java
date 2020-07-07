@@ -10,6 +10,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -75,7 +76,7 @@ public class GetCurrentAccount extends HttpServlet {
 		List<TransferBean> allTransfers = new ArrayList<>();
 		
 		CurrentAccountBean CA = caDao.getCAById(CAid);
-		allTransfers = transferDao.getTransfersByCAId(CAid);
+		
 		
 		if(CA == null) {
 			response.getWriter().println("There was a server error, retry later");
@@ -83,7 +84,20 @@ public class GetCurrentAccount extends HttpServlet {
 			return;
 		}
 		
-		request.getSession().setAttribute("CA", CA);
+		
+		try {
+			allTransfers = transferDao.getTransfersByCAId(CA.getCAcode());
+		} catch (SQLException e) {
+			e.printStackTrace();
+			response.getWriter().println("There was a server error, retry later");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			return;
+		}
+		
+		request.getCookies();
+		Cookie cookieCA = new Cookie("idCurrentAccount", Integer.toString(CA.getIdcurrentAccount()));
+		response.addCookie(cookieCA);
+		//request.getSession().setAttribute("CA", CA);
 		
 		String path = "/Pages/AccountState.html";
 		
