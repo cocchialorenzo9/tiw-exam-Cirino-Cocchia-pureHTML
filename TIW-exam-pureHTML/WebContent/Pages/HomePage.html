@@ -23,7 +23,7 @@
 		</tr>
 		<tr th:each="CA : ${allCA}">
 			<td th:text="${CA.CAcode}">$$$$</td>
-			<td th:text="${#numbers.formatDecimal(CA.total, 3, 'POINT', 2, 'COMMA')}">00.00</td>
+			<td th:text="${#numbers.formatDecimal(CA.total, 2, 'POINT', 2, 'COMMA')}">00.00</td>
 			<td><a th:href="@{/GetCurrentAccount(CAid=${CA.idcurrentAccount})}">More info</a></td>
 		</tr>
 	</table>

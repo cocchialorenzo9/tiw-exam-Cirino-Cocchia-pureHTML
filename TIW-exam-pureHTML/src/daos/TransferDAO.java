@@ -18,7 +18,7 @@ public class TransferDAO {
 	}
 	
 	public List<TransferBean> getTransfersByCAId (String CAcode) throws SQLException {
-		String query = "SELECT * FROM transfer WHERE CApayer = ? OR CApayee = ? ORDER BY date ASC";
+		String query = "SELECT * FROM transfer WHERE CApayer = ? OR CApayee = ? ORDER BY date DESC";
 		try {
 			PreparedStatement pstatement = con.prepareStatement(query);
 			System.out.println("id passed: " + CAcode);

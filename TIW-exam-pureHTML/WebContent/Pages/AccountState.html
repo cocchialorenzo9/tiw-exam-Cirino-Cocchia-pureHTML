@@ -38,7 +38,7 @@
 	</thead>
 	<tbody th:remove="all-but-first">
 		<tr th:each="transfer : ${allTransfers}">
-			<td th:text="${#dates.format(transfer.date, 'dd/MMM/yyyy HH:mm')}"></td>
+			<td th:text="${#dates.format(transfer.date, 'dd/MMM/yyyy')}"></td>
 			<td th:text="${transfer.amount}"></td>
 			<td th:text="${transfer.reason}"></td>
 			<td th:if="${transfer.CApayer} == ${thyCA.CAcode}" th:text="payer"></td>
@@ -59,10 +59,8 @@
 	</tbody>
 	</table>
 	<h5 th:if="${#lists.isEmpty(allTransfers)}">There is no transfer made by or to this account</h5>
-</main>
-
-<footer>
-	<h4>Submit to make a new Transfer</h4>
+	<br><br>
+		<h4>Submit to make a new Transfer</h4>
 	<form th:action="@{/NewTransfer}" method="POST">
 		<fieldset>
 		<table>
@@ -80,16 +78,19 @@
 			</tr>
 			<tr>
 				<td>Code payer:</td>
-				<td><input type="text" name="CApayer" required></td>
+				<td><input type="text" name="CApayer" pattern="[0-9]+" maxlength=4 required></td>
 			</tr>
 			<tr>
 				<td>Code payee:</td>
-				<td><input type="text" name="CApayee" required></td>
+				<td><input type="text" name="CApayee" pattern="[0-9]+" maxlength=4 required></td>
 			</tr>
 		</table>
 		<button type="submit">Send request</button>
 		</fieldset>
 	</form>
+</main>
+
+<footer>
 </footer>
 	
 

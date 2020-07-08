@@ -74,6 +74,10 @@ public class NewTransfer extends HttpServlet {
 		CurrentAccountBean payee = null;
 		
 		String path = "";
+		String errorPath = "/ErrorPages/PaymentKO.jsp";
+		
+		RequestDispatcher errorDispatcher = request.getRequestDispatcher(errorPath);
+
 		//input controls section
 		try {
 			
@@ -113,9 +117,12 @@ public class NewTransfer extends HttpServlet {
 		} catch (IllegalArgumentException e) {
 			//response.getWriter().println("You passed an argument considered illegal");
 			if(errorMessage.contentEquals("")) {
-				errorMessage = "There was an error in the server";
+				errorMessage = "There was an error while connecting the server";
 			}
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, errorMessage);
+			request.setAttribute("errorMessage", errorMessage);
+			errorDispatcher.forward(request, response);			
+			return;
+			//response.sendError(HttpServletResponse.SC_BAD_REQUEST, errorMessage);
 
 		}
 		
@@ -138,8 +145,12 @@ public class NewTransfer extends HttpServlet {
 				
 			} catch (SQLException e) {
 				e.printStackTrace();
+				errorMessage = "There was an error while connecting the server";
+				request.setAttribute("errorMessage", errorMessage);
+				errorDispatcher.forward(request, response);
 				//response.getWriter().println("There was an error while connecting to the server, retry later");
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "There was an error while connecting to the server, retry later");
+				//response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "There was an error while connecting to the server, retry later");
+				
 			}
 			
 			try {
@@ -154,20 +165,25 @@ public class NewTransfer extends HttpServlet {
 					connection.commit();
 					path = "/Pages/PaymentOK.jsp";
 					response.setStatus(HttpServletResponse.SC_OK);
-					response.getWriter().println("Transfer has been registered");
 					RequestDispatcher dispatcher = request.getRequestDispatcher(path);
 					dispatcher.forward(request, response);
 					return;
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
+				errorMessage = "There was an error while connecting the server";
+				request.setAttribute("errorMessage", errorMessage);
+				errorDispatcher.forward(request, response);
 				//throw new PaymentRefusedException("There was an error while connecting to the server, retry later");
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "There was an error while connecting to the server, retry later");
+				//response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "There was an error while connecting to the server, retry later");
 				try {
 					connection.rollback(savepoint);
 				} catch (SQLException e2) {
 					e2.printStackTrace();
-					response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "There was an error while connecting to the server, retry later");
+					errorMessage = "There was an error while connecting the server";
+					request.setAttribute("errorMessage", errorMessage);
+					errorDispatcher.forward(request, response);
+					//response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "There was an error while connecting to the server, retry later");
 				}
 			}
 		}

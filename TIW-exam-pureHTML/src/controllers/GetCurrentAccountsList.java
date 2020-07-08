@@ -67,10 +67,6 @@ public class GetCurrentAccountsList extends HttpServlet {
 		
 		CurrentAccountDAO caDao = new CurrentAccountDAO(connection);
 		List<CurrentAccountBean> allCA = caDao.getCAByUser(userId);
-		
-		for(CurrentAccountBean CA : allCA) {
-			System.out.println("Current check: " + CA.getTotal());
-		}
 			
 		if(allCA == null) {
 			response.getWriter().println("There was a server error, retry later");
