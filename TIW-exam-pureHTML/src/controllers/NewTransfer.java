@@ -5,6 +5,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Savepoint;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -21,8 +23,10 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
 
 import beans.CurrentAccountBean;
+import beans.UserBean;
 import daos.CurrentAccountDAO;
 import daos.TransferDAO;
+import daos.UserDAO;
 /**
  * Servlet implementation class NewTransfer
  */
@@ -67,6 +71,7 @@ public class NewTransfer extends HttpServlet {
 		
 		float amount = 0;
 		String reason = null;
+		String userCodePayee = null;
 		String CApayer = null;
 		String CApayee = null;
 		
@@ -77,49 +82,93 @@ public class NewTransfer extends HttpServlet {
 		String errorPath = "/ErrorPages/PaymentKO.jsp";
 		
 		RequestDispatcher errorDispatcher = request.getRequestDispatcher(errorPath);
+		
+		CurrentAccountDAO caDao = new CurrentAccountDAO(connection);
 
 		//input controls section
 		try {
 			
 			amount = Float.parseFloat(StringEscapeUtils.escapeJava(request.getParameter("amount")));
 			reason = StringEscapeUtils.escapeJava(request.getParameter("reason"));
+			userCodePayee = StringEscapeUtils.escapeJava(request.getParameter("userCodePayee"));
 			CApayer = StringEscapeUtils.escapeJava(request.getParameter("CApayer"));
 			CApayee = StringEscapeUtils.escapeJava(request.getParameter("CApayee"));
+			
+			if(CApayer == null || CApayer.isEmpty()) {
+				errorMessage = "CAid payer was null, please contact the administrator";
+				throw new IllegalArgumentException();
+			}
+			
+			payer = caDao.getCAByCode(CApayer);
+
+			if(payer == null) {
+				errorMessage = "It was impossible to reach payer's current account information, please contact the administrator";
+				throw new IllegalArgumentException();
+			}
 						
-			if(reason == null || CApayer == null || CApayee == null) {
+			if(reason == null || userCodePayee == null || CApayer == null || CApayee == null) {
 				errorMessage = "You can't pass null strings";
 				throw new IllegalArgumentException();
 			} else if(amount <= 0) {
 				errorMessage = "You can't do a transfer with an amount less than or equals to 0";
 				throw new IllegalArgumentException();
-			} else if(reason.isEmpty() || CApayer.isEmpty() || CApayee.isEmpty()) {
+			} else if(reason.isEmpty() ||userCodePayee.isEmpty() || CApayer.isEmpty() || CApayee.isEmpty()) {
 				errorMessage = "You can't pass empty strings";
 				throw new IllegalArgumentException();
-			} else if(CApayer.length() != 4 || CApayee.length() != 4){
+			} else if(userCodePayee.length() != 4 || CApayer.length() != 4 || CApayee.length() != 4){
 				errorMessage = "Current Account length is incorrect";
 				throw new IllegalArgumentException();
-			} else if (CApayer.contentEquals(CApayee)) {
+			} else if (CApayer.equals(CApayee)) {
 				errorMessage = "Can't transfer an amuont from an account to the same account";
 				throw new IllegalArgumentException();
 			} else {
-				CurrentAccountDAO caDao = new CurrentAccountDAO(connection);
-				payer = caDao.getCAByCode(CApayer);
+				try {
+					Integer.parseInt(userCodePayee);
+					Integer.parseInt(CApayer);
+					Integer.parseInt(CApayee);
+				} catch (NumberFormatException e) {
+					errorMessage ="You passed codes that did not contain only numbers";
+					throw new IllegalArgumentException();
+				}
+				
+				UserDAO uDao = new UserDAO(connection);
+				List<CurrentAccountBean> caPayeeList = new ArrayList<>();
+				UserBean userPayee = null;
+				try {
+					userPayee = uDao.getUserByCode(userCodePayee);
+				} catch (SQLException e) {
+					e.printStackTrace();
+					errorMessage = "Impossible to reach information about user with the submitted user code";
+					throw new IllegalArgumentException();
+				}
+				
+				if(userPayee == null) {
+					errorMessage = "There was no user with that user code";
+					throw new IllegalArgumentException();
+				}
+				
+				caPayeeList = caDao.getCAByUser(userPayee.getIduser());
 				payee = caDao.getCAByCode(CApayee);
+				
 				if(payer == null || payee == null) {
-					errorMessage = "You inserted an invalid code";
+					errorMessage = "You inserted an invalid CA code";
 					throw new IllegalArgumentException();
 				} else if(payer.getTotal() < amount) {
 					errorMessage = "Payer can't afford that amount of money";
+					throw new IllegalArgumentException();
+				} else if(!listContainsId(caPayeeList, payee)) {
+					errorMessage = "There was no corrispondence between Current Account code and User code specified";
 					throw new IllegalArgumentException();
 				}
 				inputIsOk = true;
 			}
 		} catch (IllegalArgumentException e) {
 			//response.getWriter().println("You passed an argument considered illegal");
-			if(errorMessage.contentEquals("")) {
+			if(errorMessage.equals("")) {
 				errorMessage = "There was an error while connecting the server";
 			}
 			request.setAttribute("errorMessage", errorMessage);
+			request.setAttribute("CAid", payer.getIdcurrentAccount());
 			errorDispatcher.forward(request, response);			
 			return;
 			//response.sendError(HttpServletResponse.SC_BAD_REQUEST, errorMessage);
@@ -136,7 +185,6 @@ public class NewTransfer extends HttpServlet {
 		
 		if(inputIsOk) {
 			TransferDAO transferDao = new TransferDAO(connection);
-			CurrentAccountDAO caDao = new CurrentAccountDAO(connection);
 			Savepoint savepoint = null;
 			
 			try {
@@ -165,6 +213,7 @@ public class NewTransfer extends HttpServlet {
 					connection.commit();
 					path = "/Pages/PaymentOK.jsp";
 					response.setStatus(HttpServletResponse.SC_OK);
+					request.setAttribute("CAid", payer.getIdcurrentAccount());
 					RequestDispatcher dispatcher = request.getRequestDispatcher(path);
 					dispatcher.forward(request, response);
 					return;
@@ -197,6 +246,15 @@ public class NewTransfer extends HttpServlet {
 		} catch (SQLException sqle) {
 			sqle.printStackTrace();
 		}
+	}
+	
+	public boolean listContainsId(List<CurrentAccountBean> list, CurrentAccountBean caBean) {
+		for(CurrentAccountBean ca : list) {
+			if(ca.getIdcurrentAccount() == caBean.getIdcurrentAccount()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

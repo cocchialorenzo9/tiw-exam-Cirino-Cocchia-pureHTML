@@ -7,13 +7,16 @@
 </head>
 <body>
 <header>
+<div class="container">
 	<h3>Welcome back <span th:text="${session.user.name}">mockup</span>! </h3>
 	<nav>
 		<a href="Logout">Log out</a>
 	</nav>
+</div>
 </header>
 
 <main>
+<div class="container">
 	<h4>Here there are all of your current accounts</h4>
 	<table border="1">
 		<tr>
@@ -27,6 +30,7 @@
 			<td><a th:href="@{/GetCurrentAccount(CAid=${CA.idcurrentAccount})}">More info</a></td>
 		</tr>
 	</table>
+</div>
 </main>
 
 <footer>

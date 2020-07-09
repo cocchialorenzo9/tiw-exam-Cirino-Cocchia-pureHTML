@@ -66,13 +66,15 @@ public class GetCurrentAccount extends HttpServlet {
 		try {
 			CAid = Integer.parseInt(StringEscapeUtils.escapeJava(request.getParameter("CAid")));
 		} catch (IllegalArgumentException e) {
-			System.out.println("CAid were not passed as parameter, searching in cookies");
+			/*System.out.println("CAid were not passed as parameter, searching in cookies");
 			CAid = getIdFromCookies(request.getCookies());
 			if(CAid == -1) {
 				response.getWriter().println("Wrong CAid number format for the request");
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				return;
-			}
+			}*/
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Wrong current account id passed, impossible to process the request");
+			return;
 		}
 		
 		CurrentAccountDAO caDao = new CurrentAccountDAO(connection);
@@ -98,9 +100,9 @@ public class GetCurrentAccount extends HttpServlet {
 			return;
 		}
 		
-		request.getCookies();
-		Cookie cookieCA = new Cookie("idCurrentAccount", Integer.toString(CA.getIdcurrentAccount()));
-		response.addCookie(cookieCA);
+		//request.getCookies();
+		//Cookie cookieCA = new Cookie("idCurrentAccount", Integer.toString(CA.getIdcurrentAccount()));
+		//response.addCookie(cookieCA);
 		//request.getSession().setAttribute("CA", CA);
 		
 		String path = "/Pages/AccountState.html";
@@ -126,7 +128,7 @@ public class GetCurrentAccount extends HttpServlet {
 			sqle.printStackTrace();
 		}
 	}
-	
+	/*
 	private int getIdFromCookies(Cookie[] cookies) {
 		int ret = -1;
 		
@@ -143,6 +145,6 @@ public class GetCurrentAccount extends HttpServlet {
 		}
 		
 		return ret;
-	}
+	}*/
 
 }

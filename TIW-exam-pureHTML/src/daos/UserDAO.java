@@ -32,4 +32,21 @@ public class UserDAO {
 			}
 		}
 	}
+	
+	public UserBean getUserByCode(String usercode) throws SQLException {
+		String query = "SELECT * FROM user WHERE usercode = ? ";
+		PreparedStatement pstatement = con.prepareStatement(query);
+		pstatement.setString(1,  usercode);
+		ResultSet result = pstatement.executeQuery();
+		if(!result.isBeforeFirst())
+			return null;
+		else {
+			result.next();
+			UserBean user = new UserBean();
+			user.setIduser(result.getInt("iduser"));
+			user.setName(result.getString("name"));
+			user.setUsercode(result.getString("usercode"));
+			return user;
+		}
+	}
 }

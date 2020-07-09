@@ -13,8 +13,8 @@
 	<h3><c:out value="${errormessage}"></c:out></h3>
 	
 	<c:url value="GetCurrentAccountsList" var="homeUrl"/>
-	<c:url value="GetCurrentAccount" var="CAUrl"/>
-	<p><a href="${homeUrl}">Cilck here</a> to go to your homepage
-	<p><a href="${CAUrl}">Click here</a> to go back to the selected account state
+	<c:url value="GetCurrentAccount?CAid=${requestScope.CAid}" var="CAUrl"/>
+	<p><a href="${homeUrl}">Cilck here</a> to go to your homepage</p>
+	<p><a href="${CAUrl}">Click here</a> to go back to the selected account state</p>
 </body>
 </html>

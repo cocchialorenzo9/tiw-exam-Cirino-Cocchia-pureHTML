@@ -7,14 +7,17 @@
 </head>
 <body>
 <header>
+<div class="container">
 	<h3>This is your current account page</h3>
 	<nav>
 		<a href="Logout">Log out</a><br>
 		<a href="GetCurrentAccountsList">Home</a>
 	</nav>
+</div>
 </header>
 
 <main>
+<div class="container">
 	<h4>Account details</h4>
 	<table border="1">
 		<tr>
@@ -77,17 +80,19 @@
 				<td><input type="text" name="reason" required></td>
 			</tr>
 			<tr>
-				<td>Code payer:</td>
-				<td><input type="text" name="CApayer" pattern="[0-9]+" maxlength=4 required></td>
+				<td>User code payee:</td>
+				<td><input type="text" name="userCodePayee" pattern="[0-9]+" maxlength=4 required></td>
 			</tr>
 			<tr>
-				<td>Code payee:</td>
+				<td>Current Account Code payee:</td>
 				<td><input type="text" name="CApayee" pattern="[0-9]+" maxlength=4 required></td>
 			</tr>
 		</table>
+		<input type="hidden" name="CApayer" th:value="${thyCA.CAcode}">
 		<button type="submit">Send request</button>
 		</fieldset>
 	</form>
+</div>
 </main>
 
 <footer>
