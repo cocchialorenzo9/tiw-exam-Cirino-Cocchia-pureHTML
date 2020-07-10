@@ -81,11 +81,11 @@
 			</tr>
 			<tr>
 				<td>User code payee:</td>
-				<td><input type="text" name="userCodePayee" pattern="[0-9]+" maxlength=4 required></td>
+				<td><input type="text" name="userCodePayee" pattern="\d{4}" maxlength=4 required></td>
 			</tr>
 			<tr>
 				<td>Current Account Code payee:</td>
-				<td><input type="text" name="CApayee" pattern="[0-9]+" maxlength=4 required></td>
+				<td><input type="text" name="CApayee" pattern="\d{4}" maxlength=4 required></td>
 			</tr>
 		</table>
 		<input type="hidden" name="CApayer" th:value="${thyCA.CAcode}">

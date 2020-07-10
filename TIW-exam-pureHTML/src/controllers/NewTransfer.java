@@ -112,11 +112,11 @@ public class NewTransfer extends HttpServlet {
 			} else if(amount <= 0) {
 				errorMessage = "You can't do a transfer with an amount less than or equals to 0";
 				throw new IllegalArgumentException();
-			} else if(reason.isEmpty() ||userCodePayee.isEmpty() || CApayer.isEmpty() || CApayee.isEmpty()) {
+			} else if(reason.isEmpty() || userCodePayee.isEmpty() || CApayer.isEmpty() || CApayee.isEmpty()) {
 				errorMessage = "You can't pass empty strings";
 				throw new IllegalArgumentException();
 			} else if(userCodePayee.length() != 4 || CApayer.length() != 4 || CApayee.length() != 4){
-				errorMessage = "Current Account length is incorrect";
+				errorMessage = "A code length is incorrect";
 				throw new IllegalArgumentException();
 			} else if (CApayer.equals(CApayee)) {
 				errorMessage = "Can't transfer an amuont from an account to the same account";
@@ -134,6 +134,7 @@ public class NewTransfer extends HttpServlet {
 				UserDAO uDao = new UserDAO(connection);
 				List<CurrentAccountBean> caPayeeList = new ArrayList<>();
 				UserBean userPayee = null;
+				
 				try {
 					userPayee = uDao.getUserByCode(userCodePayee);
 				} catch (SQLException e) {
@@ -248,7 +249,7 @@ public class NewTransfer extends HttpServlet {
 		}
 	}
 	
-	public boolean listContainsId(List<CurrentAccountBean> list, CurrentAccountBean caBean) {
+	private boolean listContainsId(List<CurrentAccountBean> list, CurrentAccountBean caBean) {
 		for(CurrentAccountBean ca : list) {
 			if(ca.getIdcurrentAccount() == caBean.getIdcurrentAccount()) {
 				return true;
