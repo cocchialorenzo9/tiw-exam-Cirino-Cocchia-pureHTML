@@ -29,7 +29,7 @@ public class TransferDAO {
 			while(result.next()) {
 				TransferBean newTransfer = new TransferBean();
 				newTransfer.setIdtransfer(result.getInt("idtransfer"));
-				newTransfer.setAmount(result.getInt("amount"));
+				newTransfer.setAmount(result.getFloat("amount"));
 				newTransfer.setDate(result.getDate("date"));
 				newTransfer.setReason(result.getString("reason"));
 				newTransfer.setCApayer(result.getString("CApayer"));

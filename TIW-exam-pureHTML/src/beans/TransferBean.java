@@ -5,7 +5,7 @@ import java.util.Date;
 public class TransferBean {
 	private int idtransfer;
 	private Date date;
-	private int amount;
+	private float amount;
 	private String reason;
 	private String CApayer;
 	private String CApayee;
@@ -21,10 +21,10 @@ public class TransferBean {
 	public void setDate(Date date) {
 		this.date = date;
 	}
-	public int getAmount() {
+	public float getAmount() {
 		return amount;
 	}
-	public void setAmount(int amount) {
+	public void setAmount(float amount) {
 		this.amount = amount;
 	}
 	public String getReason() {

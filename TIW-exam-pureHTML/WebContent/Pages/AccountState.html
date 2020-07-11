@@ -36,7 +36,8 @@
 			<th>Date</th>
 			<th>Amount</th>
 			<th>Reason</th>
-			<th>Role</th> <!-- Payer or payee -->
+			<th>Role</th>
+			<th>Dealer</th> <!-- Payer or payee -->
 		</tr>
 	</thead>
 	<tbody th:remove="all-but-first">
@@ -46,6 +47,8 @@
 			<td th:text="${transfer.reason}"></td>
 			<td th:if="${transfer.CApayer} == ${thyCA.CAcode}" th:text="payer"></td>
 			<td th:if="${transfer.CApayee} == ${thyCA.CAcode}" th:text="payee"></td>
+			<td th:if="${transfer.CApayer} == ${thyCA.CAcode}" th:text="${transfer.CApayee}"></td>
+			<td th:if="${transfer.CApayee} == ${thyCA.CAcode}" th:text="${transfer.CApayer}"></td>
 		</tr>
 		<tr>
 			<td>Mock up date0</td>

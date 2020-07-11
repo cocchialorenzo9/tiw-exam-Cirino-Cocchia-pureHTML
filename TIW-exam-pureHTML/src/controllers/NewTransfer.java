@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.text.translate.UnicodeUnescaper;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
@@ -90,6 +91,10 @@ public class NewTransfer extends HttpServlet {
 			
 			amount = Float.parseFloat(StringEscapeUtils.escapeJava(request.getParameter("amount")));
 			reason = StringEscapeUtils.escapeJava(request.getParameter("reason"));
+			
+		    String utf8Reason = new UnicodeUnescaper().translate(reason);
+		    reason = utf8Reason;
+			
 			userCodePayee = StringEscapeUtils.escapeJava(request.getParameter("userCodePayee"));
 			CApayer = StringEscapeUtils.escapeJava(request.getParameter("CApayer"));
 			CApayee = StringEscapeUtils.escapeJava(request.getParameter("CApayee"));
