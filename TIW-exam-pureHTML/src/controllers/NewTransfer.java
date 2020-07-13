@@ -177,7 +177,7 @@ public class NewTransfer extends HttpServlet {
 		} catch (IllegalArgumentException | SQLException e) {
 			//response.getWriter().println("You passed an argument considered illegal");
 			if(errorMessage.equals("")) {
-				errorMessage = "There was an error while connecting the server";
+				errorMessage = "There was an error while connecting to the server";
 			}
 			request.setAttribute("errorMessage", errorMessage);
 			request.setAttribute("CAid", payer.getIdcurrentAccount());

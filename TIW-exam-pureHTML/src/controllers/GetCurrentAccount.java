@@ -89,21 +89,15 @@ public class GetCurrentAccount extends HttpServlet {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			return;
 		}
-
+		
 		try {
+			
 			if(!CoherenceSupervisor.checkOwnsThisCurrentAccount(request, connection, CAid)) {
 				response.getWriter().println("User not allowed");
 				response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-				response.sendRedirect(getServletContext().getContextPath() + "/GetCurrentAccountsList");
 				return;
 			}
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-		
-		try {
+			
 			allTransfers = transferDao.getTransfersByCAId(CA.getCAcode());
 		} catch (SQLException e) {
 			e.printStackTrace();
