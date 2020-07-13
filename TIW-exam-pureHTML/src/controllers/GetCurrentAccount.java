@@ -10,7 +10,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,6 +22,7 @@ import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
 
 import daos.CurrentAccountDAO;
 import daos.TransferDAO;
+import utils.CoherenceSupervisor;
 import beans.CurrentAccountBean;
 import beans.TransferBean;
 
@@ -89,7 +89,19 @@ public class GetCurrentAccount extends HttpServlet {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			return;
 		}
-		
+
+		try {
+			if(!CoherenceSupervisor.checkOwnsThisCurrentAccount(request, connection, CAid)) {
+				response.getWriter().println("User not allowed");
+				response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+				response.sendRedirect(getServletContext().getContextPath() + "/GetCurrentAccountsList");
+				return;
+			}
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 		
 		try {
 			allTransfers = transferDao.getTransfersByCAId(CA.getCAcode());

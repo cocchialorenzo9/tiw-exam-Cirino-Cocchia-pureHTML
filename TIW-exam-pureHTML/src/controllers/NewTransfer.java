@@ -17,8 +17,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.lang3.text.translate.UnicodeUnescaper;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.text.translate.UnicodeUnescaper;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
@@ -28,6 +28,7 @@ import beans.UserBean;
 import daos.CurrentAccountDAO;
 import daos.TransferDAO;
 import daos.UserDAO;
+import utils.CoherenceSupervisor;
 /**
  * Servlet implementation class NewTransfer
  */
@@ -110,6 +111,11 @@ public class NewTransfer extends HttpServlet {
 				errorMessage = "It was impossible to reach payer's current account information, please contact the administrator";
 				throw new IllegalArgumentException();
 			}
+			
+			if(!CoherenceSupervisor.checkOwnsThisCurrentAccount(request, connection, Integer.parseInt(CApayer))) {
+				errorMessage = "You don't own such current account, can't complete the request";
+				throw new IllegalArgumentException();
+			}
 						
 			if(reason == null || userCodePayee == null || CApayer == null || CApayee == null) {
 				errorMessage = "You can't pass null strings";
@@ -168,7 +174,7 @@ public class NewTransfer extends HttpServlet {
 				}
 				inputIsOk = true;
 			}
-		} catch (IllegalArgumentException e) {
+		} catch (IllegalArgumentException | SQLException e) {
 			//response.getWriter().println("You passed an argument considered illegal");
 			if(errorMessage.equals("")) {
 				errorMessage = "There was an error while connecting the server";
