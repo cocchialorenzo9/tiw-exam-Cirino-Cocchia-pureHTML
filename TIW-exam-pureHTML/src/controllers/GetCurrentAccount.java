@@ -85,24 +85,21 @@ public class GetCurrentAccount extends HttpServlet {
 		
 		
 		if(CA == null) {
-			response.getWriter().println("There was a server error, retry later");
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "There was a server error, retry later");
 			return;
 		}
 		
 		try {
 			
 			if(!CoherenceSupervisor.checkOwnsThisCurrentAccount(request, connection, CAid)) {
-				response.getWriter().println("User not allowed");
-				response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+				response.sendError(HttpServletResponse.SC_FORBIDDEN, "User not allowed");
 				return;
 			}
 			
 			allTransfers = transferDao.getTransfersByCAId(CA.getCAcode());
 		} catch (SQLException e) {
 			e.printStackTrace();
-			response.getWriter().println("There was a server error, retry later");
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "There was a server error, retry later");
 			return;
 		}
 		

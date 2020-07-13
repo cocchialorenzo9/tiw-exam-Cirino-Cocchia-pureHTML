@@ -77,14 +77,14 @@ public class Login extends HttpServlet {
 			user = userdao.checkCredentials(usercode, password);
 		} catch (SQLException e) {
 			e.printStackTrace();
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			response.getWriter().println("There was some error in database, retry later");
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "There was some error in database, retry later");
 			return;
 		}
 	
 		if (user == null) {
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-			response.getWriter().println("Incorrect credentials");
+			//response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			//response.getWriter().println("Incorrect credentials");
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Incorrect credentials");
 		} else {
 			
 			System.out.println("Login by " + user.getName());

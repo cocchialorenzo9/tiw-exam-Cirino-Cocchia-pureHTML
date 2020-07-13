@@ -112,7 +112,7 @@ public class NewTransfer extends HttpServlet {
 				throw new IllegalArgumentException();
 			}
 			
-			if(!CoherenceSupervisor.checkOwnsThisCurrentAccount(request, connection, Integer.parseInt(CApayer))) {
+			if(!CoherenceSupervisor.checkOwnsThisCurrentAccount(request, connection, payer.getIdcurrentAccount())) {
 				errorMessage = "You don't own such current account, can't complete the request";
 				throw new IllegalArgumentException();
 			}

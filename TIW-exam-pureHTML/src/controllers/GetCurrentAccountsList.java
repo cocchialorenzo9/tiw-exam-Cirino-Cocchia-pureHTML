@@ -69,8 +69,7 @@ public class GetCurrentAccountsList extends HttpServlet {
 		List<CurrentAccountBean> allCA = caDao.getCAByUser(userId);
 			
 		if(allCA == null) {
-			response.getWriter().println("There was a server error, retry later");
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "There was a server error, retry later");
 			return;
 		}
 		
